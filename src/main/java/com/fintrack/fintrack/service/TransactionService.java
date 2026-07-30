@@ -5,6 +5,9 @@ import com.fintrack.fintrack.dto.transaction.TransactionResponse;
 import com.fintrack.fintrack.entity.Category;
 import com.fintrack.fintrack.entity.Transaction;
 import com.fintrack.fintrack.entity.User;
+import com.fintrack.fintrack.exception.CategoryNotFoundException;
+import com.fintrack.fintrack.exception.TransactionNotFoundException;
+import com.fintrack.fintrack.exception.UserNotFoundException;
 import com.fintrack.fintrack.repository.CategoryRepo;
 import com.fintrack.fintrack.repository.TransactionRepo;
 import com.fintrack.fintrack.repository.UserRepo;
@@ -30,8 +33,8 @@ public class TransactionService {
 
     public TransactionResponse makeTransaction(TransactionRequest request)
     {
-        User user=userRepo.findById(request.getUserId()).orElseThrow(()->new RuntimeException("user not found"));
-        Category category=categoryRepo.findById(request.getCategoryId()).orElseThrow(()->new RuntimeException("user not found"));
+        User user=userRepo.findById(request.getUserId()).orElseThrow(()->new UserNotFoundException("user not found"));
+        Category category=categoryRepo.findById(request.getCategoryId()).orElseThrow(()->new CategoryNotFoundException("user not found"));
 
         Transaction transaction=new Transaction();
         transaction.setAmount(request.getAmount());
@@ -77,7 +80,7 @@ public class TransactionService {
 
     public TransactionResponse getTransactionById(Long id)
     {
-        Transaction t=transactionRepo.findById(id).orElseThrow(()->new RuntimeException("no Transaction found"));
+        Transaction t=transactionRepo.findById(id).orElseThrow(()->new TransactionNotFoundException("no Transaction found"));
         TransactionResponse response=new TransactionResponse();
         response.setId(t.getId());
         response.setAmount(t.getAmount());
@@ -92,9 +95,9 @@ public class TransactionService {
     }
     public TransactionResponse updateTransaction(Long id, TransactionRequest request)
     {
-        User user=userRepo.findById(request.getUserId()).orElseThrow(()->new RuntimeException("user not found"));
-        Category category=categoryRepo.findById(request.getCategoryId()).orElseThrow(()->new RuntimeException("category not found"));
-        Transaction transaction=transactionRepo.findById(id).orElseThrow(()->new RuntimeException("no Transaction found"));
+        User user=userRepo.findById(request.getUserId()).orElseThrow(()->new UserNotFoundException("user not found"));
+        Category category=categoryRepo.findById(request.getCategoryId()).orElseThrow(()->new CategoryNotFoundException("category not found"));
+        Transaction transaction=transactionRepo.findById(id).orElseThrow(()->new TransactionNotFoundException("no Transaction found"));
         transaction.setAmount(request.getAmount());
 
         transaction.setDescription(request.getDescription());
@@ -116,7 +119,7 @@ public class TransactionService {
 
     public void deleteTransaction(Long id)
     {
-        Transaction transaction=transactionRepo.findById(id).orElseThrow(()->new RuntimeException("no Transaction found"));
+        Transaction transaction=transactionRepo.findById(id).orElseThrow(()->new TransactionNotFoundException("no Transaction found"));
         transactionRepo.deleteById(transaction.getId());
     }
 }

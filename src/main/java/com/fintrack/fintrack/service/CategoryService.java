@@ -3,6 +3,8 @@ package com.fintrack.fintrack.service;
 import com.fintrack.fintrack.dto.category.CategoryRequest;
 import com.fintrack.fintrack.dto.category.CategoryResponse;
 import com.fintrack.fintrack.entity.Category;
+import com.fintrack.fintrack.exception.CategoryAlreadyExistsException;
+import com.fintrack.fintrack.exception.CategoryNotFoundException;
 import com.fintrack.fintrack.repository.CategoryRepo;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -24,6 +26,11 @@ public class CategoryService {
 
     public CategoryResponse createCategory(CategoryRequest categoryRequest)
     {
+
+        if(categoryRepo.existsByName(categoryRequest.getName()))
+        {
+            throw new CategoryAlreadyExistsException("category already exist");
+        }
         Category category=new Category();
 
         category.setName(categoryRequest.getName());
@@ -67,7 +74,7 @@ public class CategoryService {
 
     public CategoryResponse getCategoryById(Long id)
     {
-        Category category=categoryRepo.findById(id).orElseThrow(()->new RuntimeException("Category not found"));
+        Category category=categoryRepo.findById(id).orElseThrow(()->new CategoryNotFoundException("Category not found"));
         CategoryResponse response=new CategoryResponse();
         response.setId(category.getId());
         response.setName(category.getName());
@@ -79,7 +86,7 @@ public class CategoryService {
 
     public CategoryResponse updateCategory(Long id,CategoryRequest request)
     {
-        Category category=categoryRepo.findById(id).orElseThrow(()->new RuntimeException("Category not found"));
+        Category category=categoryRepo.findById(id).orElseThrow(()->new CategoryNotFoundException("Category not found"));
         category.setName(request.getName());
         category.setType(request.getType());
 
@@ -95,8 +102,8 @@ public class CategoryService {
     }
     public void deleteCategory(Long id)
     {
-        Category category=categoryRepo.findById(id).orElseThrow(()->new RuntimeException("Category not found"));
-        categoryRepo.deleteById(id);
+        Category category=categoryRepo.findById(id).orElseThrow(()->new CategoryNotFoundException("Category not found"));
+        categoryRepo.deleteById(category.getId());
 
 
     }

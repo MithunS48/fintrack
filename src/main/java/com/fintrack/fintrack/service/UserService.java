@@ -1,13 +1,17 @@
 package com.fintrack.fintrack.service;
 
+
 import com.fintrack.fintrack.dto.user.UserRequest;
 import com.fintrack.fintrack.dto.user.UserResponse;
 import com.fintrack.fintrack.entity.User;
 import com.fintrack.fintrack.enums.Role;
+import com.fintrack.fintrack.exception.UserAlreadyExistsException;
+import com.fintrack.fintrack.exception.UserNotFoundException;
 import com.fintrack.fintrack.repository.UserRepo;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.Setter;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
@@ -20,15 +24,22 @@ import java.util.List;
 public class UserService {
 
     private final UserRepo userRepo;
+    private final PasswordEncoder passwordEncoder;
 
     public UserResponse createUser(UserRequest request)
     {
+
+        if(userRepo.existsByEmail(request.getEmail()))
+        {
+            throw new UserAlreadyExistsException("user already exist");
+        }
         User user =new User();
+
         user.setFirstName(request.getFirstName());
         user.setLastName(request.getLastName());
         user.setEmail(request.getEmail());
         user.setRole(Role.USER);
-        user.setPassword(request.getPassword());
+        user.setPassword(passwordEncoder.encode(request.getPassword()));
 
         User savedUser=userRepo.save(user);
 
@@ -67,7 +78,7 @@ public class UserService {
 
     public UserResponse getUserById(Long id)
     {
-        User user=userRepo.findById(id).orElseThrow(()->new RuntimeException("user not found"));
+        User user=userRepo.findById(id).orElseThrow(()->new UserNotFoundException("user not found"));
         UserResponse response =new UserResponse();
         response.setId(user.getId());
         response.setFirstName(user.getFirstName());
@@ -81,11 +92,11 @@ public class UserService {
 
     public UserResponse updateUser(Long id ,UserRequest request)
     {
-        User user=userRepo.findById(id).orElseThrow(()->new RuntimeException("user not found"));
+        User user=userRepo.findById(id).orElseThrow(()->new UserNotFoundException("user not found"));
         user.setFirstName(request.getFirstName());
         user.setLastName(request.getLastName());
         user.setEmail(request.getEmail());
-        user.setPassword(request.getPassword());
+        user.setPassword(passwordEncoder.encode(request.getPassword()));
 
         User updatedUser=userRepo.save(user);
         UserResponse response =new UserResponse();
@@ -99,7 +110,7 @@ public class UserService {
     }
     public void deleteUserById(Long id)
     {
-        User user=userRepo.findById(id).orElseThrow(()->new RuntimeException("user not found"));
+        User user=userRepo.findById(id).orElseThrow(()->new UserNotFoundException("user not found"));
         userRepo.deleteById(id);
 
     }
