@@ -16,11 +16,7 @@ public class UserController {
 
     private final UserService userService;
 
-    @PostMapping
-    public UserResponse CreateUser(@Valid @RequestBody UserRequest request)
-    {
-        return userService.createUser(request);
-    }
+
 
     @GetMapping
     public List<UserResponse> getAllUser()
