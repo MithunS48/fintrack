@@ -1,16 +1,38 @@
 package com.fintrack.fintrack.controller;
 
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+
+import com.fintrack.fintrack.dto.category.CategoryRequest;
+import com.fintrack.fintrack.dto.category.CategoryResponse;
+import com.fintrack.fintrack.service.CategoryService;
+import jakarta.validation.Valid;
+
+import lombok.RequiredArgsConstructor;
+import org.springframework.web.bind.annotation.*;
 
 @RestController
+@RequiredArgsConstructor
 @RequestMapping("/admin")
 public class AdminController {
 
-    @GetMapping
-    public String welcome()
-    {
-        return "welcome admin";
+    private final CategoryService categoryService;
+
+    @PostMapping("/category")
+    public CategoryResponse createGlobalCategory(
+            @Valid @RequestBody CategoryRequest categoryRequest) {
+
+        return categoryService.createGlobalCategory(categoryRequest);
+    }
+
+    @PutMapping("/category/{id}")
+    public CategoryResponse updateGlobalCategory(
+            @PathVariable Long id,
+            @Valid @RequestBody CategoryRequest request) {
+
+        return categoryService.updateGlobalCategory(id, request);
+    }
+
+    @DeleteMapping("/category/{id}")
+    public void deleteGlobalById(@PathVariable Long id) {
+        categoryService.deleteGlobalCategory(id);
     }
 }

@@ -1,6 +1,8 @@
 package com.fintrack.fintrack.service;
 
 
+import com.fintrack.fintrack.dto.user.ChangePassword;
+import com.fintrack.fintrack.dto.user.UpdateUser;
 import com.fintrack.fintrack.dto.user.UserRequest;
 import com.fintrack.fintrack.dto.user.UserResponse;
 import com.fintrack.fintrack.entity.User;
@@ -11,6 +13,7 @@ import com.fintrack.fintrack.repository.UserRepo;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.Setter;
+import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
@@ -27,30 +30,10 @@ public class UserService {
     private final PasswordEncoder passwordEncoder;
 
 
-    public List<UserResponse> getAllUser()
+
+    public UserResponse getUserProfile(UserDetails userDetails)
     {
-
-        List<UserResponse> list=new ArrayList<>();
-        List<User> user=userRepo.findAll();
-
-        for(User u:user)
-        {
-            UserResponse response=new UserResponse();
-            response.setId(u.getId());
-            response.setFirstName(u.getFirstName());
-            response.setLastName(u.getLastName());
-            response.setEmail(u.getEmail());
-            response.setRole(u.getRole());
-            list.add(response);
-
-        }
-        return list;
-
-    }
-
-    public UserResponse getUserById(Long id)
-    {
-        User user=userRepo.findById(id).orElseThrow(()->new UserNotFoundException("user not found"));
+        User user=userRepo.findByEmail(userDetails.getUsername()).orElseThrow(()-> new UserNotFoundException("User not found"));
         UserResponse response =new UserResponse();
         response.setId(user.getId());
         response.setFirstName(user.getFirstName());
@@ -62,13 +45,17 @@ public class UserService {
 
     }
 
-    public UserResponse updateUser(Long id ,UserRequest request)
+
+
+
+
+
+    public UserResponse updateUser(UserDetails userDetails, UpdateUser updateUser)
     {
-        User user=userRepo.findById(id).orElseThrow(()->new UserNotFoundException("user not found"));
-        user.setFirstName(request.getFirstName());
-        user.setLastName(request.getLastName());
-        user.setEmail(request.getEmail());
-        user.setPassword(passwordEncoder.encode(request.getPassword()));
+        User user=userRepo.findByEmail(userDetails.getUsername()).orElseThrow(()-> new UserNotFoundException("User not found"));
+        user.setFirstName(updateUser.getFirstName());
+        user.setLastName(updateUser.getLastName());
+
 
         User updatedUser=userRepo.save(user);
         UserResponse response =new UserResponse();
@@ -80,10 +67,28 @@ public class UserService {
         return response;
 
     }
-    public void deleteUserById(Long id)
+
+    public String changePassword(UserDetails userDetails, ChangePassword changePassword)
     {
-        User user=userRepo.findById(id).orElseThrow(()->new UserNotFoundException("user not found"));
-        userRepo.deleteById(id);
+
+        User user=userRepo.findByEmail(userDetails.getUsername()).orElseThrow(()-> new UserNotFoundException("User not found"));
+
+        if(!passwordEncoder.matches(changePassword.getOldPassword(), user.getPassword()))
+        {
+            throw  new RuntimeException("incorrect password");
+        }
+
+        user.setPassword(passwordEncoder.encode(changePassword.getNewPassword()));
+        userRepo.save(user);
+        return  "Password changed successfully";
+
+    }
+    public String deleteProfile(UserDetails userDetails)
+    {
+        User user=userRepo.findByEmail(userDetails.getUsername()).orElseThrow(()->new UserNotFoundException("user not found"));
+        userRepo.delete(user);
+
+        return "Account deleted successfully";
 
     }
 

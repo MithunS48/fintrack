@@ -26,6 +26,10 @@ public class Category {
     @Column(nullable = false)
     private TransactionType type;
 
+    @ManyToOne
+    @JoinColumn(name = "user_id")
+    private User user;
+
 
     @OneToMany(mappedBy = "category",orphanRemoval = true)
     private List<Transaction> transaction;
