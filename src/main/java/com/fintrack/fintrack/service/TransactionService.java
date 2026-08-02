@@ -14,6 +14,7 @@ import com.fintrack.fintrack.repository.UserRepo;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.Setter;
+import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Service;
 
 
@@ -31,10 +32,10 @@ public class TransactionService {
     private final CategoryRepo categoryRepo;
 
 
-    public TransactionResponse makeTransaction(TransactionRequest request)
+    public TransactionResponse makeTransaction(UserDetails userDetails, TransactionRequest request)
     {
-        User user=userRepo.findById(request.getUserId()).orElseThrow(()->new UserNotFoundException("user not found"));
-        Category category=categoryRepo.findById(request.getCategoryId()).orElseThrow(()->new CategoryNotFoundException("user not found"));
+        User user=userRepo.findByEmail(userDetails.getUsername()).orElseThrow(()->new UserNotFoundException("user not found"));
+        Category category=categoryRepo.findByIdAndUserOrIdAndUserIsNull(request.getCategoryId(),user,request.getCategoryId()).orElseThrow(()->new CategoryNotFoundException("Category not found"));
 
         Transaction transaction=new Transaction();
         transaction.setAmount(request.getAmount());
@@ -58,10 +59,12 @@ public class TransactionService {
     }
 
 
-    public List<TransactionResponse> getAllTransaction()
+    public List<TransactionResponse> getAllTransactions(UserDetails userDetails)
     {
         List<TransactionResponse> list=new ArrayList<>();
-        List<Transaction> transactions=transactionRepo.findAll();
+        User user=userRepo.findByEmail(userDetails.getUsername()).orElseThrow(()->new UserNotFoundException("user not found"));
+
+        List<Transaction> transactions=transactionRepo.findAllByUser(user);
 
         for(Transaction t:transactions)
         {
@@ -78,30 +81,16 @@ public class TransactionService {
         return list;
     }
 
-    public TransactionResponse getTransactionById(Long id)
+
+    public TransactionResponse updateTransaction(UserDetails userDetails,Long id, TransactionRequest request)
     {
-        Transaction t=transactionRepo.findById(id).orElseThrow(()->new TransactionNotFoundException("no Transaction found"));
-        TransactionResponse response=new TransactionResponse();
-        response.setId(t.getId());
-        response.setAmount(t.getAmount());
-        response.setDescription(t.getDescription());
-        response.setTransactionDateTime(t.getTransactionDateTime());
-        response.setCategoryType(t.getCategory().getType());
-        response.setCategoryName(t.getCategory().getName());
-
-
-        return response;
-
-    }
-    public TransactionResponse updateTransaction(Long id, TransactionRequest request)
-    {
-        User user=userRepo.findById(request.getUserId()).orElseThrow(()->new UserNotFoundException("user not found"));
-        Category category=categoryRepo.findById(request.getCategoryId()).orElseThrow(()->new CategoryNotFoundException("category not found"));
-        Transaction transaction=transactionRepo.findById(id).orElseThrow(()->new TransactionNotFoundException("no Transaction found"));
+        User user=userRepo.findByEmail(userDetails.getUsername()).orElseThrow(()->new UserNotFoundException("user not found"));
+        Category category=categoryRepo.findByIdAndUserOrIdAndUserIsNull(request.getCategoryId(),user,request.getCategoryId()).orElseThrow(()->new CategoryNotFoundException("Category not found"));
+        Transaction transaction=transactionRepo.findByIdAndUser(id,user).orElseThrow(()->new TransactionNotFoundException("no Transaction found"));
         transaction.setAmount(request.getAmount());
 
         transaction.setDescription(request.getDescription());
-        transaction.setUser(user);
+
         transaction.setCategory(category);
         Transaction save=transactionRepo.save(transaction);
 
@@ -117,9 +106,11 @@ public class TransactionService {
 
     }
 
-    public void deleteTransaction(Long id)
+    public void deleteTransaction(UserDetails userDetails,Long id)
     {
-        Transaction transaction=transactionRepo.findById(id).orElseThrow(()->new TransactionNotFoundException("no Transaction found"));
-        transactionRepo.deleteById(transaction.getId());
+        User user=userRepo.findByEmail(userDetails.getUsername()).orElseThrow(()->new UserNotFoundException("user not found"));
+
+        Transaction transaction=transactionRepo.findByIdAndUser(id,user).orElseThrow(()->new TransactionNotFoundException("no Transaction found"));
+        transactionRepo.delete(transaction);
     }
 }

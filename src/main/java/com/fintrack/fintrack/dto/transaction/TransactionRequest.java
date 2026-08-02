@@ -2,6 +2,7 @@ package com.fintrack.fintrack.dto.transaction;
 
 
 import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.Positive;
 import jakarta.validation.constraints.Size;
 import lombok.Getter;
 import lombok.Setter;
@@ -15,6 +16,7 @@ import java.time.LocalDateTime;
 public class TransactionRequest {
 
 
+    @Positive
     private BigDecimal amount;
 
     @NotBlank
@@ -24,7 +26,7 @@ public class TransactionRequest {
 
 
 
-    private Long userId;
+
 
 
     private Long categoryId;

@@ -5,6 +5,8 @@ import com.fintrack.fintrack.dto.transaction.TransactionResponse;
 import com.fintrack.fintrack.service.TransactionService;
 import jakarta.validation.Valid;
 import lombok.AllArgsConstructor;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -17,32 +19,28 @@ public class TransactionController {
     private final TransactionService transactionService;
 
     @PostMapping
-    public TransactionResponse makeTransaction(@Valid @RequestBody TransactionRequest request)
+    public TransactionResponse makeTransaction(@AuthenticationPrincipal UserDetails userDetails, @Valid @RequestBody TransactionRequest request)
     {
-        return transactionService.makeTransaction(request);
+        return transactionService.makeTransaction(userDetails,request);
     }
 
     @GetMapping
-    public List<TransactionResponse> getAllTransaction()
+    public List<TransactionResponse> getAllTransaction(@AuthenticationPrincipal UserDetails userDetails)
     {
-        return transactionService.getAllTransaction();
+        return transactionService.getAllTransactions(userDetails);
     }
 
-    @GetMapping("/{id}")
-    public TransactionResponse getById(@PathVariable Long id)
-    {
-        return transactionService.getTransactionById(id);
-    }
+
 
     @PutMapping("/{id}")
-    public TransactionResponse updateTransaction(@PathVariable Long id,@Valid @RequestBody TransactionRequest request)
+    public TransactionResponse updateTransaction(@AuthenticationPrincipal UserDetails userDetails,@PathVariable Long id,@Valid @RequestBody TransactionRequest request)
     {
-        return transactionService.updateTransaction(id,request);
+        return transactionService.updateTransaction(userDetails,id,request);
     }
 
     @DeleteMapping("/{id}")
-    public void deleteTransaction(@PathVariable Long id)
+    public void deleteTransaction(@AuthenticationPrincipal UserDetails userDetails,@PathVariable Long id)
     {
-        transactionService.deleteTransaction(id);
+        transactionService.deleteTransaction(userDetails,id);
     }
 }

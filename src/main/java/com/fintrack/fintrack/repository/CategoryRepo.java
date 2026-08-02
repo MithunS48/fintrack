@@ -17,4 +17,5 @@ public interface CategoryRepo extends JpaRepository<Category,Long> {
     List<Category> findByUserOrUserIsNull(User user);
     boolean existsByNameAndUserIsNull(String name);
     Optional<Category> findByIdAndUserIsNull(long id);
+    Optional<Category> findByIdAndUserOrIdAndUserIsNull(long id1,User user,Long id2);
 }
