@@ -1,6 +1,7 @@
 package com.fintrack.fintrack.repository;
 
 
+import com.fintrack.fintrack.entity.Category;
 import com.fintrack.fintrack.entity.Transaction;
 import com.fintrack.fintrack.entity.User;
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -15,4 +16,5 @@ public interface TransactionRepo extends JpaRepository<Transaction,Long> {
    List<Transaction> findAllByUser(User user);
    Optional<Transaction> findByIdAndUser(Long id ,User user);
 
+    List<Transaction> findAllByUserAndCategory(User user, Category category);
 }
