@@ -5,6 +5,7 @@ import com.fintrack.fintrack.dto.transaction.TransactionResponse;
 import com.fintrack.fintrack.entity.Category;
 import com.fintrack.fintrack.entity.Transaction;
 import com.fintrack.fintrack.entity.User;
+import com.fintrack.fintrack.enums.TransactionType;
 import com.fintrack.fintrack.exception.CategoryNotFoundException;
 import com.fintrack.fintrack.exception.TransactionNotFoundException;
 import com.fintrack.fintrack.exception.UserNotFoundException;
@@ -14,13 +15,19 @@ import com.fintrack.fintrack.repository.UserRepo;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.Setter;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Service;
 
 
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
+
 @Service
 @AllArgsConstructor
 @Setter
@@ -59,15 +66,22 @@ public class TransactionService {
     }
 
 
-    public List<TransactionResponse> getAllTransactions(UserDetails userDetails)
+    public List<TransactionResponse> getAllTransactions(UserDetails userDetails, TransactionType type, Long categoryId , LocalDate sDate,LocalDate eDate,int page,int size)
+
     {
+        Pageable pageable= PageRequest.of(page,size);
         List<TransactionResponse> list=new ArrayList<>();
         User user=userRepo.findByEmail(userDetails.getUsername()).orElseThrow(()->new UserNotFoundException("user not found"));
 
-        List<Transaction> transactions=transactionRepo.findAllByUser(user);
+        Page<Transaction> transactions=transactionRepo.findAllByUser(user,pageable);
 
         for(Transaction t:transactions)
         {
+            if(type!=null && t.getCategory().getType()!=type) continue;
+            if(categoryId!=null && !Objects.equals(t.getCategory().getId(), categoryId)) continue;
+            if(sDate!=null && t.getTransactionDateTime().toLocalDate().isBefore(sDate)) continue;
+            if(eDate!=null && t.getTransactionDateTime().toLocalDate().isAfter(eDate)) continue;
+
             TransactionResponse response=new TransactionResponse();
             response.setId(t.getId());
             response.setAmount(t.getAmount());
@@ -77,6 +91,7 @@ public class TransactionService {
             response.setCategoryName(t.getCategory().getName());
 
             list.add(response);
+
         }
         return list;
     }
