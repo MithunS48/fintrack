@@ -6,6 +6,7 @@ import com.fintrack.fintrack.dto.report.YearlyReportResponse;
 import com.fintrack.fintrack.service.CategoryReportService;
 import com.fintrack.fintrack.service.MonthlyReportService;
 import com.fintrack.fintrack.service.YearlyReportService;
+import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -19,6 +20,7 @@ import java.util.List;
 @RestController
 @RequiredArgsConstructor
 @RequestMapping("/report")
+@SecurityRequirement(name = "Bearer Authentication")
 public class ReportController {
     private final MonthlyReportService monthlyReportService;
     private final YearlyReportService yearlyReportService;

@@ -4,6 +4,7 @@ import com.fintrack.fintrack.dto.transaction.TransactionRequest;
 import com.fintrack.fintrack.dto.transaction.TransactionResponse;
 import com.fintrack.fintrack.enums.TransactionType;
 import com.fintrack.fintrack.service.TransactionService;
+import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import jakarta.validation.Valid;
 import lombok.AllArgsConstructor;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
@@ -16,6 +17,7 @@ import java.util.List;
 @RestController
 @AllArgsConstructor
 @RequestMapping("/transaction")
+@SecurityRequirement(name = "Bearer Authentication")
 public class TransactionController {
 
     private final TransactionService transactionService;

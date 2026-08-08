@@ -3,6 +3,7 @@ package com.fintrack.fintrack.controller;
 import com.fintrack.fintrack.dto.category.CategoryRequest;
 import com.fintrack.fintrack.dto.category.CategoryResponse;
 import com.fintrack.fintrack.service.CategoryService;
+import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import jakarta.validation.Valid;
 import lombok.AllArgsConstructor;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
@@ -14,6 +15,7 @@ import java.util.List;
 @RestController
 @AllArgsConstructor
 @RequestMapping("/category")
+@SecurityRequirement(name = "Bearer Authentication")
 public class CategoryController {
 
     private final CategoryService categoryService;

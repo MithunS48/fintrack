@@ -5,6 +5,7 @@ import com.fintrack.fintrack.dto.user.UpdateUser;
 import com.fintrack.fintrack.dto.user.UserRequest;
 import com.fintrack.fintrack.dto.user.UserResponse;
 import com.fintrack.fintrack.service.UserService;
+import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import jakarta.validation.Valid;
 import lombok.AllArgsConstructor;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
@@ -16,6 +17,7 @@ import java.util.List;
 @RestController
 @AllArgsConstructor
 @RequestMapping("/user")
+@SecurityRequirement(name = "Bearer Authentication")
 public class UserController {
 
     private final UserService userService;
